@@ -1,0 +1,7 @@
+#+title: lumber - another Clojure logging library
+
+Lumber is yet another really minimal logging library for Clojure. It
+aimed to be compatible with Timbre, but lost interest after a while.
+
+Don't use it unless you are absolutely desperate for a "do the
+absolute minimum" logging library. You've been warned.
