@@ -15,10 +15,10 @@
   (apply println
          (u/format-timestamp (System/currentTimeMillis)
                              "yyyy-MM-dd hh:mm:ss")
-         (str ns ":" (:line config))
          (str (-> level name str/upper-case)
               (when *preamble*
                 (str " " *preamble*)))
+         (str ns ":" (:line config))
          (->> args
               (map
                (fn [x]
