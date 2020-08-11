@@ -3,6 +3,13 @@
    [java.util TimeZone]
    [java.text SimpleDateFormat]))
 
+(defn timezone
+  "Looks up a java.util.TimeZone instance by name"
+  [tz]
+  (if (string? tz)
+    (java.util.TimeZone/getTimeZone ^String tz)
+    tz))
+
 (defn ^SimpleDateFormat simple-date-formatter
   "Create a java.text.SimpleDateFormat with `format-string` and
   optional `tz` timezone."
@@ -10,9 +17,7 @@
    (simple-date-formatter format-string "UTC"))
   ([format-string tz]
    (doto (SimpleDateFormat. format-string)
-     (.setTimeZone (if (string? tz)
-                     (TimeZone/getTimeZone tz)
-                     tz)))))
+     (.setTimeZone (timezone tz)))))
 
 (def ^:constant iso-8601-formatter
   (simple-date-formatter "yyyy-MM-dd'T'HH:mm:ss.SSSZ"))
