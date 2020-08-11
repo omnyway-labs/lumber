@@ -1,7 +1,7 @@
 (ns lumber.util
   (:import
    [java.util TimeZone]
-   [java.text SimpleDateFormat]))
+   [java.text DateFormat SimpleDateFormat]))
 
 (defn timezone
   "Looks up a java.util.TimeZone instance by name"
@@ -20,9 +20,9 @@
      (.setTimeZone (timezone tz)))))
 
 (def ^:constant iso-8601-formatter
-  (simple-date-formatter "yyyy-MM-dd'T'HH:mm:ss.SSSZ"))
+  (simple-date-formatter "yyyy-MM-dd'T'HH:mm:ss.SSSX"))
 
-(defn as-formatter [formatter-args]
+(defn ^SimpleDateFormat as-formatter [formatter-args]
   (let [[formatter & _] formatter-args]
     (if (instance? SimpleDateFormat formatter)
       formatter
@@ -46,7 +46,7 @@
   ([timestamp]
    (format-timestamp timestamp iso-8601-formatter))
   ([timestamp & formatter-args]
-   (.format (as-formatter formatter-args) timestamp)))
+   (.format ^DateFormat (as-formatter formatter-args) timestamp)))
 
 (defn safe-pr-str [o]
   (binding [*print-readably* true
