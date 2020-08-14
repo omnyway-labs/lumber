@@ -14,7 +14,7 @@
 (defn printer [config level ns & args]
   (apply println
          (u/format-timestamp (System/currentTimeMillis)
-                             "yyyy-MM-dd hh:mm:ss")
+                             "yyyy-MM-dd HH:mm:ss")
          (str (-> level name str/upper-case)
               (when *preamble*
                 (str " " *preamble*)))
