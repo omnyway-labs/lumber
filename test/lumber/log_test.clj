@@ -45,3 +45,15 @@
                (log/trace "test 1")
                (count @logs)))))))
 
+(deftest log-errors
+  (with-log-atom logs
+    (is (= 1
+           (do
+             (log/log-errors
+              (.get [] 0))
+             (count @logs))))
+
+    (is (thrown?
+         java.lang.IndexOutOfBoundsException
+         (log/log-and-rethrow-errors
+          (.get [] 0))))))
