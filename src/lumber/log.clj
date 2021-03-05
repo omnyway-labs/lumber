@@ -1,7 +1,9 @@
 (ns lumber.log
   (:require
    [clojure.string :as str]
-   [lumber.util :as u]))
+   [lumber.util :as u])
+  (:import
+   [clojure.lang ExceptionInfo]))
 
 (defonce logger (atom (agent nil)))
 
@@ -67,14 +69,19 @@
 (defmacro log-errors [& body]
   `(try
      ~@body
+     (catch ExceptionInfo ex#
+       (error ex# (ex-data ex#)))
      (catch Throwable ex#
-       (error (.getMessage ex#)))))
+       (error ex#))))
 
 (defmacro log-and-rethrow-errors [& body]
   `(try
      ~@body
+     (catch ExceptionInfo ex#
+       (error ex# (ex-data ex#))
+       (throw ex#))
      (catch Throwable ex#
-       (error (.getMessage ex#))
+       (error ex#)
        (throw ex#))))
 
 (defmacro spy
