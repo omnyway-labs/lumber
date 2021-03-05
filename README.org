@@ -5,3 +5,24 @@ aimed to be compatible with Timbre, but lost interest after a while.
 
 Don't use it unless you are absolutely desperate for a "do the
 absolute minimum" logging library. You've been warned.
+
+* Usage
+
+#+BEGIN_SRC clojure
+  (require '[lumber.log :as log])
+
+  (log/info {:id 1 :message "hello"})
+  ;; 2050-03-05 20:54:33 INFO user:84 {:id 1, :message \"hello\"}
+
+  ;; thread locally set :serializer to JSON serializer - generally not a
+  ;; good idea to mix different serializers in the same log stream
+  (log/with-config {:serializer #'kit.util.core/write-json}
+    (log/info {:id 1 :message "hello"}))
+  ;; 2050-03-05 20:56:38 INFO user:84 {\"id\":1,\"message\":\"hello\"}
+
+  ;; globally set the serializer
+  (log/set-default-config {:serializer #'kit.util.core/write-json})
+
+  (log/info {:id 1 :message "hello"})
+  ;; 2050-03-05 20:56:38 INFO user:84 {\"id\":1,\"message\":\"hello\"}
+#+END_SRC

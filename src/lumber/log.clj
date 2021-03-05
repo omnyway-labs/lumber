@@ -7,26 +7,41 @@
 
 (defonce logger (atom (agent nil)))
 
-(def ^:dynamic *preamble* nil)
-(defmacro with-preamble [preamble & body]
-  `(binding [*preamble* ~preamble]
+(def default-config {:serializer #'u/safe-pr-str})
+(defn set-default-config [config]
+  (def default-config config))
+
+(def ^:dynamic *config* nil)
+(defmacro with-config [config & body]
+  `(binding [*config* (merge (or *config* default-config) ~config)]
      ~@body))
-(defn preamble [] *preamble*)
+
+(defn config [& ks]
+  (get-in *config* ks))
+
+(defmacro with-preamble
+  "Specify a PREAMBLE (string or structure) to emit at the beginning of
+  every log entry within BODY"
+  [preamble & body]
+  `(with-config {:preamble ~preamble}
+     ~@body))
+
+(defn serialize [x]
+  (if (string? x)
+    x
+    ((or (config :serializer)
+         (default-config :serializer)
+         #'u/safe-pr-str) x)))
 
 (defn printer [config level ns & args]
   (apply println
          (u/format-timestamp (System/currentTimeMillis)
                              "yyyy-MM-dd HH:mm:ss")
          (str (-> level name str/upper-case)
-              (when *preamble*
-                (str " " *preamble*)))
+              (when-let [preamble (config :preamble)]
+                (str " " (serialize preamble))))
          (str ns ":" (:line config))
-         (->> args
-              (map
-               (fn [x]
-                 (if (string? x)
-                   x
-                   (u/safe-pr-str x)))))))
+         (map serialize args)))
 
 (def ^:dynamic *level* (atom :info))
 (defn set-level!
