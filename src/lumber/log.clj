@@ -33,14 +33,14 @@
          (default-config :serializer)
          #'u/safe-pr-str) x)))
 
-(defn printer [config level ns & args]
+(defn printer [{:keys [preamble line column]} level ns & args]
   (apply println
          (u/format-timestamp (System/currentTimeMillis)
                              "yyyy-MM-dd HH:mm:ss")
          (str (-> level name str/upper-case)
-              (when-let [preamble (config :preamble)]
+              (when preamble
                 (str " " (serialize preamble))))
-         (str ns ":" (:line config))
+         (str ns ":" line ":" column)
          (map serialize args)))
 
 (def ^:dynamic *level* (atom :info))
@@ -67,19 +67,19 @@
 (defmacro log [level & rest]
   `(log* ~(meta &form) ~level ~@rest))
 
+;; fixme: this is not propagating the &form metadata of the correct
+;; macro
 (defmacro deflogfn [level & [log-fn]]
   `(defmacro ~(symbol (name level)) [& args#]
-     (let [log-fn# (or ~log-fn 'log*)
-           level# ~level
-           fmeta# ~(meta &form)]
-       `(~log-fn# ~fmeta# ~level# ~@args#))))
+     (let [level# ~level]
+       `(log* (meta '~&form) ~level# ~@args#))))
 
-(deflogfn :fatal)
-(deflogfn :error)
-(deflogfn :warn)
-(deflogfn :info)
-(deflogfn :debug)
-(deflogfn :trace)
+(defmacro fatal [& args] `(log* ~(meta &form) :fatal ~@args))
+(defmacro error [& args] `(log* ~(meta &form) :error ~@args))
+(defmacro warn [& args] `(log* ~(meta &form) :warn ~@args))
+(defmacro info [& args] `(log* ~(meta &form) :info ~@args))
+(defmacro debug [& args] `(log* ~(meta &form) :debug ~@args))
+(defmacro trace [& args] `(log* ~(meta &form) :trace ~@args))
 
 (defmacro log-errors [& body]
   `(try
