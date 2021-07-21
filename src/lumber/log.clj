@@ -33,14 +33,14 @@
          (default-config :serializer)
          #'u/safe-pr-str) x)))
 
-(defn printer [config level ns & args]
+(defn printer [{:keys [preamble line column]} level ns & args]
   (apply println
          (u/format-timestamp (System/currentTimeMillis)
                              "yyyy-MM-dd HH:mm:ss")
          (str (-> level name str/upper-case)
-              (when-let [preamble (config :preamble)]
+              (when preamble
                 (str " " (serialize preamble))))
-         (str ns ":" (:line config))
+         (str ns ":" line ":" column)
          (map serialize args)))
 
 (def ^:dynamic *level* (atom :info))
